@@ -1,5 +1,5 @@
-name = "Sarang"
-age = 20
+text = "python programming"
 
-print(name)
-print(age)
+print(
+    text.replace(" ", "_").upper().startswith("PY")
+)
