@@ -1,19 +1,16 @@
+import json
 tasks = []
-starred_tasks = []
+
 def load_tasks():
     try:
-        with open("tasks.txt", "r") as file:
-            lines = file.readlines()
-            for line in lines:
-                tasks.append(line.strip())
-
+        with open("tasks.json", "r") as file:
+            loaded_tasks = json.load(file)
+            tasks.extend(loaded_tasks)
     except FileNotFoundError:
         pass
 def save_tasks():
-    with open("tasks.txt", "w") as file:
-        for task in tasks:
-            file.write(task + "\n")
-    
+    with open("tasks.json", "w") as file:
+        json.dump(tasks, file)
 
 def show_menu():
     print("==== To_do_Manager ====")
@@ -21,13 +18,16 @@ def show_menu():
     print("2: View tasks")
     print("3: Delete a task")
     print("4: Star a task")
-    print("5: Exit")
+    print("5: Mark a task as completed")
+    print("6: Exit")
 def add_task():
     print("\n=== Add Task ===")
     task = input("enter the task:")
     save = input("Do you want to save the task? (y/n): ")
     if save.lower() == "y":
-         tasks.append(task)
+         tasks.append(
+            {"title": task, "starred": False, "completed": False}
+         )
          save_tasks()
          print("Task saved successfully!")
    
@@ -40,10 +40,15 @@ def view_tasks():
     else:
       print("Tasks:")
       for i, task in enumerate(tasks, start=1):
-         if task in starred_tasks:
-            print(f"{i} * {task}")
-         else:
-             print(f"{i}. {task}")
+        if task["starred"] and task["completed"]:
+                     print(f"{i} ⭐ [✔] {task['title']}")
+        elif task["starred"]:
+            print(f"{i} ⭐ {task['title']}")
+        elif task["completed"]:
+            print(f"{i}. [✔] {task['title']}")
+        else:
+            print(f"{i}. {task['title']}")
+        
 def delete_task():
         print("\n=== Delete Task ===")
         if not tasks:
@@ -51,7 +56,7 @@ def delete_task():
         else:
            print ("Tasks:")
            for i, task in enumerate(tasks, start=1):
-            print(f"{i}. {task}")
+            print(f"{i}. {task['title']}")
            try:
              task_number = int(input("enter the task number to be deleted: "))
            except ValueError:
@@ -62,9 +67,8 @@ def delete_task():
             deleted_task = tasks[task_number - 1]
             tasks.pop(task_number - 1)
             save_tasks()
-            print(f"Task successfully deleted: {deleted_task}")
-            if deleted_task in starred_tasks:
-             starred_tasks.remove(deleted_task)
+            print(f"Task successfully deleted: {deleted_task['title']}")
+            
            else:
             print("Invalid task number.")
             return
@@ -75,7 +79,7 @@ def star_task():
    else:
       print("Tasks:")
       for i, task in enumerate(tasks, start=1):
-       print(f"{i}. {task}")
+       print(f"{i}. {task['title']}")
       try:
        task_number = int(input("Enter the task number to star: "))
       except ValueError:
@@ -83,10 +87,43 @@ def star_task():
        return
       if 1 <= task_number <= len(tasks):
         starred_task = tasks[task_number - 1]
-        starred_tasks.append(starred_task)
-        print(f"Task successfully starred: {starred_task}")
+        starred_task["starred"] = not starred_task["starred"]
+        save_tasks()
+        if starred_task["starred"]:
+            print(f"Task starred: {starred_task['title']}")
+            
+        else:
+         print(f"Task unstarred: {starred_task['title']}")
+        
       else:
        print("Invalid task number.")
+def mark_task_completed():
+    print("\n=== Mark Task as Completed ===")
+    if not tasks:
+        print("no tasks found")
+    else:
+       print ("Tasks:")
+       for i, task in enumerate(tasks, start=1):
+           print(f"{i}. {task['title']}")
+    try:
+            task_number = int(input("Enter the task number to mark as completed: "))
+    except ValueError:
+            print("Invalid number. Enter a valid number.")
+            return
+    if 1 <= task_number <= len(tasks):
+        completed_task = tasks[task_number - 1]
+        completed_task["completed"] = not completed_task["completed"]
+        
+        save_tasks()
+        if completed_task["completed"]:
+         print(f"Task completed: {completed_task['title']}")
+        else:
+            print(f"Task marked as not completed: {completed_task['title']}")
+
+    else:
+        print("Invalid task number.")
+    
+
 def exit_program():
     print("\n=== Exit ===")
     print("Exiting the program...")
@@ -108,6 +145,8 @@ while True:
  elif choice == 4:
      star_task()
  elif choice == 5:
+     mark_task_completed()
+ elif choice == 6:
      exit_program()
      break
  else:
