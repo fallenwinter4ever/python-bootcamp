@@ -41,9 +41,9 @@ def view_tasks():
       print("Tasks:")
       for i, task in enumerate(tasks, start=1):
         if task["starred"] and task["completed"]:
-                     print(f"{i} ⭐ [✔] {task['title']}")
+                     print(f"{i} 👀 [✔] {task['title']}")
         elif task["starred"]:
-            print(f"{i} ⭐ {task['title']}")
+            print(f"{i} 👀 {task['title']}")
         elif task["completed"]:
             print(f"{i}. [✔] {task['title']}")
         else:
